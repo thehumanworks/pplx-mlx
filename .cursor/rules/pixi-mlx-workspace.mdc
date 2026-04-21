@@ -1,0 +1,16 @@
+---
+description: "Apply when working in the Perplexity MLX monorepo."
+globs: ""
+alwaysApply: true
+---
+
+# Pixi MLX Workspace
+
+- Use Pixi for all commands: `pixi install`, `pixi run ...`, `pixi lock --check`.
+- Keep the primary platform `osx-arm64`; MLX execution targets Apple Silicon.
+- Keep Python and macOS requirements aligned with the conda-forge MLX build matrix.
+  Current lock uses Python 3.10 and macOS 14.5 because MLX 0.31.x requires them.
+- Prefer conda-forge dependencies in `[dependencies]`; use `[pypi-dependencies]` mainly for local editable packages or packages missing from conda-forge.
+- Keep Ruff tasks scoped to `packages` and `tests`; never run format/lint over `.pixi`.
+- Do not commit downloaded Hugging Face weights, ONNX files, or generated MLX artifacts.
+  Keep them under `artifacts/`, `models/`, or `data/`.

@@ -1,0 +1,20 @@
+---
+description: "Apply when researching, validating, or changing conversion behavior."
+globs: "packages/pplx-mlx-convert/**/*.py,tests/**/*.py,.agents/**/*.md"
+alwaysApply: false
+---
+
+# Conversion Research And Validation
+
+- Before downloading weights, inspect lightweight HF files first: `config.json`,
+  tokenizer files, `modules.json`, `1_Pooling/config.json`, and safetensors index.
+- Record the source repo and commit SHA for every converted artifact.
+- Avoid accidental full-weight downloads during metadata probes; use explicit file reads.
+- Validate converted output against a reference path before claiming correctness:
+  Transformers remote-code model, Perplexity API, or ONNX reference.
+- Use nested `list[list[str]]` inputs for contextual models. Chunks in one document
+  are joined with the tokenizer separator token before late chunk extraction.
+- Check shape, dtype, chunk count, and cosine similarity. Int8 outputs are unnormalized
+  by default; normalize only when explicitly requested by the caller.
+- Required local gates remain `pixi run quality` plus at least one conversion/inference
+  smoke test for the touched model path.

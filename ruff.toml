@@ -1,0 +1,7 @@
+line-length = 100
+target-version = "py310"
+src = ["packages/pplx-mlx-convert/src", "tests"]
+exclude = [".git", ".mypy_cache", ".pixi", ".pytest_cache", ".ruff_cache", "artifacts", "data", "models"]
+
+[lint]
+select = ["B", "E", "F", "I", "SIM", "UP"]

@@ -1,0 +1,21 @@
+---
+description: "Apply when implementing Perplexity contextual embedding conversion or inference."
+globs: "packages/pplx-mlx-convert/**/*.py,tests/**/*.py"
+alwaysApply: false
+---
+
+# Perplexity Context Model Compatibility
+
+- Target repos are `perplexity-ai/pplx-embed-context-v1-4b` and `perplexity-ai/pplx-embed-context-v1-0.6b`.
+- Both configs use `model_type = "bidirectional_pplx_qwen3"` and custom remote code:
+  `PPLXQwen3Config` plus `PPLXQwen3ContextualModel`.
+- Do not assume vanilla `mlx_lm.convert` works. Installed MLX-LM supports `qwen3`
+  but rejects `bidirectional_pplx_qwen3` with `Model type bidirectional_pplx_qwen3 not supported.`
+- Reuse MLX-LM Qwen3 pieces only after preserving the Perplexity behavior:
+  non-causal bidirectional attention, contextual `encode()`, separator-based late chunking,
+  mean pooling, and tanh quantization.
+- Expected full dimensions are 1024 for `0.6b` and 2560 for `4b`; support Matryoshka
+  truncation only after full-dimension parity is validated.
+- Do not default conversion to float16. Source weights are float32, and float16 produced
+  NaNs in smoke validation; use bfloat16 or float32 unless a parity test proves otherwise.
+- The models do not require instruction prefixes. Do not add query/document task prompts.

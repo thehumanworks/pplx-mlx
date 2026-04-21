@@ -1,0 +1,42 @@
+[workspace]
+authors = ["agentmish <rodat.dev@proton.me>"]
+channels = ["conda-forge"]
+description = "Monorepo for converting Perplexity embedding models into MLX format for Apple Silicon."
+name = "perplexity-mlx"
+platforms = ["osx-arm64"]
+requires-pixi = ">=0.67.0"
+version = "0.1.0"
+
+[dependencies]
+python = ">=3.10,<3.11"
+pip = ">=25.0"
+hatchling = ">=1.27,<2"
+mlx = ">=0.31,<0.32"
+mlx-lm = ">=0.31,<0.32"
+huggingface_hub = ">=1.11,<2"
+transformers = ">=5.5,<6"
+safetensors = ">=0.7,<0.8"
+numpy = ">=2.0,<3"
+pyyaml = ">=6,<7"
+typer = ">=0.12"
+rich = ">=13"
+pytest = ">=9,<10"
+ruff = ">=0.14,<0.15"
+mypy = ">=1.18,<2"
+
+[system-requirements]
+macos = "14.5"
+
+[pypi-options]
+no-build-isolation = ["pplx-mlx-convert"]
+
+[pypi-dependencies]
+pplx-mlx-convert = { path = "packages/pplx-mlx-convert", editable = true }
+
+[tasks]
+format = { cmd = "ruff format packages tests", description = "Format Python code with Ruff." }
+lint = { cmd = "ruff check packages tests", description = "Run Ruff lint checks." }
+list-models = { cmd = "pplx-mlx-convert list-models", description = "List configured Perplexity Hugging Face source models." }
+quality = { depends-on = ["lint", "typecheck", "test"], description = "Run lint, typecheck, and tests." }
+test = { cmd = "pytest", description = "Run Python unit tests." }
+typecheck = { cmd = "mypy", description = "Run mypy type checks." }
