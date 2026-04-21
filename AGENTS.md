@@ -9,9 +9,13 @@
 
 - This repo converts Perplexity embedding models from Hugging Face into MLX format for efficient Apple Silicon inference.
 - Initial target models:
+  - `perplexity-ai/pplx-embed-v1-4b`
+  - `perplexity-ai/pplx-embed-v1-0.6b`
   - `perplexity-ai/pplx-embed-context-v1-4b`
   - `perplexity-ai/pplx-embed-context-v1-0.6b`
 - Published MLX artifact repos:
+  - `agentmish/pplx-embed-v1-4b-mlx`
+  - `agentmish/pplx-embed-v1-0.6b-mlx`
   - `agentmish/pplx-embed-context-v1-4b-mlx`
   - `agentmish/pplx-embed-context-v1-0.6b-mlx`
 
@@ -34,6 +38,10 @@
 
 - Install/update the environment: `pixi install`
 - List target models: `pixi run list-models`
+- Convert the smaller independent model: `pixi run pplx-mlx-convert convert pplx-embed-v1-0.6b --overwrite`
+- Smoke-validate the smaller independent artifact: `pixi run pplx-mlx-convert smoke-validate artifacts/mlx/pplx-embed-v1-0.6b`
+- Convert the 4B independent model: `pixi run pplx-mlx-convert convert pplx-embed-v1-4b --overwrite`
+- Smoke-validate the 4B independent artifact: `pixi run pplx-mlx-convert smoke-validate artifacts/mlx/pplx-embed-v1-4b`
 - Convert the smaller model: `pixi run pplx-mlx-convert convert pplx-embed-context-v1-0.6b --overwrite`
 - Smoke-validate the smaller artifact: `pixi run pplx-mlx-convert smoke-validate artifacts/mlx/pplx-embed-context-v1-0.6b`
 - Convert the 4B model: `pixi run pplx-mlx-convert convert pplx-embed-context-v1-4b --overwrite`
@@ -56,5 +64,5 @@
 - Keep Python and macOS requirements aligned with the conda-forge MLX build matrix. The initial environment uses Python 3.10 and macOS 14.5 because MLX `0.31.x` currently requires that combination on `osx-arm64`.
 - Do not start converter implementation by calling vanilla `mlx_lm.convert` on the target repos; research found the target `bidirectional_pplx_qwen3` model type is unsupported by installed MLX-LM.
 - Default conversion dtype is bfloat16. Source weights are float32; float16 caused NaNs during local contextual embedding smoke validation.
-- Both target models have passed local bfloat16 MLX smoke validation and sample comparison against the Transformers remote-code float32 reference.
+- All four target models have passed local bfloat16 MLX smoke validation and sample comparison against the Transformers remote-code float32 reference.
 - Published Hugging Face repos include a generated model card and embedded `pplx_mlx_convert` loader package. They are not vanilla `mlx_lm.load()` artifacts.

@@ -8,6 +8,8 @@ Remote source repository: <https://github.com/thehumanworks/pplx-mlx>
 
 | Model | Source |
 | --- | --- |
+| `pplx-embed-v1-4b` | <https://huggingface.co/perplexity-ai/pplx-embed-v1-4b> |
+| `pplx-embed-v1-0.6b` | <https://huggingface.co/perplexity-ai/pplx-embed-v1-0.6b> |
 | `pplx-embed-context-v1-4b` | <https://huggingface.co/perplexity-ai/pplx-embed-context-v1-4b> |
 | `pplx-embed-context-v1-0.6b` | <https://huggingface.co/perplexity-ai/pplx-embed-context-v1-0.6b> |
 
@@ -15,6 +17,8 @@ Remote source repository: <https://github.com/thehumanworks/pplx-mlx>
 
 | Model | MLX Artifact |
 | --- | --- |
+| `pplx-embed-v1-4b` | <https://huggingface.co/agentmish/pplx-embed-v1-4b-mlx> |
+| `pplx-embed-v1-0.6b` | <https://huggingface.co/agentmish/pplx-embed-v1-0.6b-mlx> |
 | `pplx-embed-context-v1-4b` | <https://huggingface.co/agentmish/pplx-embed-context-v1-4b-mlx> |
 | `pplx-embed-context-v1-0.6b` | <https://huggingface.co/agentmish/pplx-embed-context-v1-0.6b-mlx> |
 
@@ -41,10 +45,16 @@ pixi install
 
 ```sh
 pixi run list-models
+pixi run pplx-mlx-convert convert pplx-embed-v1-0.6b --overwrite
+pixi run pplx-mlx-convert smoke-validate artifacts/mlx/pplx-embed-v1-0.6b
+pixi run pplx-mlx-convert convert pplx-embed-v1-4b --overwrite
+pixi run pplx-mlx-convert smoke-validate artifacts/mlx/pplx-embed-v1-4b
 pixi run pplx-mlx-convert convert pplx-embed-context-v1-0.6b --overwrite
 pixi run pplx-mlx-convert smoke-validate artifacts/mlx/pplx-embed-context-v1-0.6b
 pixi run pplx-mlx-convert convert pplx-embed-context-v1-4b --overwrite
 pixi run pplx-mlx-convert smoke-validate artifacts/mlx/pplx-embed-context-v1-4b
+pixi run pplx-mlx-convert publish pplx-embed-v1-0.6b --namespace agentmish
+pixi run pplx-mlx-convert publish pplx-embed-v1-4b --namespace agentmish
 pixi run pplx-mlx-convert publish pplx-embed-context-v1-0.6b --namespace agentmish
 pixi run pplx-mlx-convert publish pplx-embed-context-v1-4b --namespace agentmish
 pixi run format

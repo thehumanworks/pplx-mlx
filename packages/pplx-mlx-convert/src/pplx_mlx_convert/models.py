@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import Final
+from typing import Final, Literal
+
+ModelKind = Literal["independent", "contextual"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -10,6 +12,7 @@ class ModelSpec:
     huggingface_repo: str
     parameter_count: str
     embedding_dimension: int
+    kind: ModelKind
 
     @property
     def huggingface_url(self) -> str:
@@ -22,16 +25,32 @@ class ModelSpec:
 
 MODEL_SPECS: Final[tuple[ModelSpec, ...]] = (
     ModelSpec(
+        slug="pplx-embed-v1-4b",
+        huggingface_repo="perplexity-ai/pplx-embed-v1-4b",
+        parameter_count="4b",
+        embedding_dimension=2560,
+        kind="independent",
+    ),
+    ModelSpec(
+        slug="pplx-embed-v1-0.6b",
+        huggingface_repo="perplexity-ai/pplx-embed-v1-0.6b",
+        parameter_count="0.6b",
+        embedding_dimension=1024,
+        kind="independent",
+    ),
+    ModelSpec(
         slug="pplx-embed-context-v1-4b",
         huggingface_repo="perplexity-ai/pplx-embed-context-v1-4b",
         parameter_count="4b",
         embedding_dimension=2560,
+        kind="contextual",
     ),
     ModelSpec(
         slug="pplx-embed-context-v1-0.6b",
         huggingface_repo="perplexity-ai/pplx-embed-context-v1-0.6b",
         parameter_count="0.6b",
         embedding_dimension=1024,
+        kind="contextual",
     ),
 )
 

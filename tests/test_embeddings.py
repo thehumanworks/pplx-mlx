@@ -4,6 +4,7 @@ from pplx_mlx_convert.embeddings import (
     extract_chunk_token_spans,
     mean_pool,
     quantize_int8_tanh,
+    quantize_ubinary_tanh,
 )
 
 
@@ -43,3 +44,12 @@ def test_quantize_int8_tanh_matches_perplexity_formula() -> None:
 
     assert quantized.dtype == np.int8
     assert quantized.tolist() == [-127, -97, 0, 97, 127]
+
+
+def test_quantize_ubinary_tanh_packs_sign_bits() -> None:
+    values = np.array([[1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0]], dtype=np.float32)
+
+    quantized = quantize_ubinary_tanh(values)
+
+    assert quantized.dtype == np.uint8
+    assert quantized.tolist() == [[170]]

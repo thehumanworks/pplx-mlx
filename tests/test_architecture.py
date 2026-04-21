@@ -15,9 +15,16 @@ def test_get_model_classes_accepts_pplx_model_type() -> None:
     assert args_class.__name__ == "ModelArgs"
 
 
+def test_get_model_classes_accepts_independent_embedding_model_type() -> None:
+    model_class, args_class = get_pplx_model_classes({"model_type": "qwen3"})
+
+    assert model_class is PPLXQwen3Model
+    assert args_class.__name__ == "ModelArgs"
+
+
 def test_get_model_classes_rejects_other_model_type() -> None:
     with pytest.raises(ValueError, match="Unsupported Perplexity model type"):
-        get_pplx_model_classes({"model_type": "qwen3"})
+        get_pplx_model_classes({"model_type": "llama"})
 
 
 def test_bidirectional_padding_mask_allows_only_valid_keys() -> None:

@@ -11,6 +11,16 @@ DEFAULT_NAMESPACE = "agentmish"
 SOURCE_REPOSITORY_URL = "https://github.com/thehumanworks/pplx-mlx"
 
 VALIDATION_SUMMARY = {
+    "pplx-embed-v1-0.6b": {
+        "smoke_shapes": "[[2, 1024]]",
+        "reference_cosines": "0.9997950, 0.9997987, 0.9997995",
+        "reference_delta": "max absolute int8 delta 1; mean absolute int8 delta 0.191",
+    },
+    "pplx-embed-v1-4b": {
+        "smoke_shapes": "[[2, 2560]]",
+        "reference_cosines": "0.9998998, 0.9998891, 0.9999021",
+        "reference_delta": "max absolute int8 delta 2; mean absolute int8 delta 0.259",
+    },
     "pplx-embed-context-v1-0.6b": {
         "smoke_shapes": "[[2, 1024], [1, 1024]]",
         "reference_cosines": "0.9995409, 0.9995418, 0.9997643",
@@ -98,7 +108,7 @@ def publish_artifact(
         repo_id=prepared.repo_id,
         repo_type="model",
         token=token,
-        commit_message=f"Upload {slug} MLX contextual embedding artifact",
+        commit_message=f"Upload {slug} MLX embedding artifact",
     )
 
     return PublishedArtifact(
@@ -110,6 +120,17 @@ def publish_artifact(
 
 def generate_model_card(spec: ModelSpec, *, repo_id: str) -> str:
     validation = VALIDATION_SUMMARY[spec.slug]
+    contextual = spec.kind == "contextual"
+    usage = _contextual_usage(repo_id, spec) if contextual else _independent_usage(repo_id, spec)
+    input_summary = (
+        "It takes a list of documents where each document is a list of chunks, and returns one "
+        "embedding matrix per document."
+        if contextual
+        else "It takes a list of texts and returns one embedding matrix for the batch."
+    )
+    smoke_label = "contextual output" if contextual else "embedding output"
+    reference_label = "sample contextual inputs" if contextual else "sample text inputs"
+    tag_block = "- contextual-embeddings\n" if contextual else "- mteb\n"
     return f"""---
 license: mit
 base_model: {spec.huggingface_repo}
@@ -120,7 +141,7 @@ tags:
 - apple-silicon
 - feature-extraction
 - sentence-similarity
-- contextual-embeddings
+{tag_block.rstrip()}
 - perplexity
 - qwen3
 ---
@@ -130,8 +151,7 @@ tags:
 MLX conversion of [{spec.huggingface_repo}](https://huggingface.co/{spec.huggingface_repo})
 for Apple Silicon.
 
-This is a contextual embedding model. It takes a list of documents where each document is a
-list of chunks, and returns one embedding matrix per document.
+This is a {"contextual" if contextual else "standard"} embedding model. {input_summary}
 
 ## Important Loading Note
 
@@ -152,31 +172,7 @@ pip install mlx mlx-lm transformers huggingface_hub numpy
 ## Usage
 
 ```python
-import sys
-from huggingface_hub import snapshot_download
-
-repo_path = snapshot_download("{repo_id}")
-sys.path.insert(0, repo_path)
-
-from pplx_mlx_convert import load_embedder
-
-embedder = load_embedder(repo_path)
-doc_chunks = [
-    [
-        "Curiosity begins in childhood with endless questions about the world.",
-        "As we grow, curiosity drives us to explore new ideas.",
-        "Scientific breakthroughs often start with a curious question.",
-    ],
-    [
-        "The curiosity rover explores Mars searching for ancient life.",
-        "Each discovery on Mars sparks new questions about the universe.",
-    ],
-]
-
-embeddings = embedder.encode(doc_chunks)
-print(embeddings[0].shape)  # (3, {spec.embedding_dimension})
-print(embeddings[1].shape)  # (2, {spec.embedding_dimension})
-print(embeddings[0].dtype)  # int8
+{usage}
 ```
 
 The model natively produces unnormalized int8 embeddings by default. Use cosine similarity
@@ -193,10 +189,10 @@ and `embedder.encode(..., quantization="binary")` returns binary tanh embeddings
 
 ## Validation
 
-Local MLX smoke validation passed with finite raw float embeddings and int8 contextual output
+Local MLX smoke validation passed with finite raw float embeddings and int8 {smoke_label}
 shapes `{validation["smoke_shapes"]}`.
 
-Compared against the original Transformers remote-code float32 model on sample contextual inputs:
+Compared against the original Transformers remote-code float32 model on {reference_label}:
 
 - cosine similarities: {validation["reference_cosines"]}
 - int8 delta: {validation["reference_delta"]}
@@ -219,3 +215,48 @@ def _copy_loader_package(artifact_path: Path) -> None:
     destination_package.mkdir(parents=True)
     for filename in ["__init__.py", "architecture.py", "embeddings.py", "models.py"]:
         shutil.copy2(source_package / filename, destination_package / filename)
+
+
+def _loader_preamble(repo_id: str) -> str:
+    return f'''import sys
+from huggingface_hub import snapshot_download
+
+repo_path = snapshot_download("{repo_id}")
+sys.path.insert(0, repo_path)
+
+from pplx_mlx_convert import load_embedder
+
+embedder = load_embedder(repo_path)'''
+
+
+def _independent_usage(repo_id: str, spec: ModelSpec) -> str:
+    return f"""{_loader_preamble(repo_id)}
+texts = [
+    "Scientists explore the universe driven by curiosity.",
+    "Children learn through curious exploration.",
+    "Historical discoveries began with curious questions.",
+]
+
+embeddings = embedder.encode(texts)
+print(embeddings.shape)  # (3, {spec.embedding_dimension})
+print(embeddings.dtype)  # int8"""
+
+
+def _contextual_usage(repo_id: str, spec: ModelSpec) -> str:
+    return f"""{_loader_preamble(repo_id)}
+doc_chunks = [
+    [
+        "Curiosity begins in childhood with endless questions about the world.",
+        "As we grow, curiosity drives us to explore new ideas.",
+        "Scientific breakthroughs often start with a curious question.",
+    ],
+    [
+        "The curiosity rover explores Mars searching for ancient life.",
+        "Each discovery on Mars sparks new questions about the universe.",
+    ],
+]
+
+embeddings = embedder.encode(doc_chunks)
+print(embeddings[0].shape)  # (3, {spec.embedding_dimension})
+print(embeddings[1].shape)  # (2, {spec.embedding_dimension})
+print(embeddings[0].dtype)  # int8"""

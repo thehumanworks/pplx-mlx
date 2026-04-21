@@ -76,11 +76,12 @@ def convert_model(
     save_model(destination, model, donate_model=True)
 
     config = dict(config)
-    config["mlx_contextual_embedding"] = {
+    config["mlx_embedding"] = {
         "source_repo": spec.huggingface_repo,
         "source_revision": source_revision,
         "converter": "pplx-mlx-convert",
         "dtype": dtype,
+        "kind": spec.kind,
     }
     save_config(config, config_path=destination / "config.json")
 
@@ -147,6 +148,7 @@ def _write_conversion_metadata(
         "source_repo": spec.huggingface_repo,
         "source_revision": source_revision,
         "dtype": dtype,
-        "artifact_type": "mlx-contextual-embedding",
+        "artifact_type": f"mlx-{spec.kind}-embedding",
+        "kind": spec.kind,
     }
     (destination / "conversion.json").write_text(json.dumps(metadata, indent=2) + "\n")

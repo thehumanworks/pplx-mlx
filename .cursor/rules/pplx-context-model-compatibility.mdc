@@ -1,14 +1,14 @@
 ---
-description: "Apply when implementing Perplexity contextual embedding conversion or inference."
+description: "Apply when implementing Perplexity embedding conversion or inference."
 globs: "packages/pplx-mlx-convert/**/*.py,tests/**/*.py"
 alwaysApply: false
 ---
 
-# Perplexity Context Model Compatibility
+# Perplexity Model Compatibility
 
-- Target repos are `perplexity-ai/pplx-embed-context-v1-4b` and `perplexity-ai/pplx-embed-context-v1-0.6b`.
-- Both configs use `model_type = "bidirectional_pplx_qwen3"` and custom remote code:
-  `PPLXQwen3Config` plus `PPLXQwen3ContextualModel`.
+- Target repos include independent `pplx-embed-v1-*` and contextual `pplx-embed-context-v1-*`.
+- All configs use custom remote code. Independent models map `AutoModel` to
+  `modeling.PPLXQwen3Model`; contextual models map to `modeling.PPLXQwen3ContextualModel`.
 - Do not assume vanilla `mlx_lm.convert` works. Installed MLX-LM supports `qwen3`
   but rejects `bidirectional_pplx_qwen3` with `Model type bidirectional_pplx_qwen3 not supported.`
 - Reuse MLX-LM Qwen3 pieces only after preserving the Perplexity behavior:
