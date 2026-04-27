@@ -2,8 +2,6 @@
 
 Monorepo for converting Perplexity embedding models into MLX format so they can run efficiently on Apple Silicon.
 
-Remote source repository: <https://github.com/thehumanworks/pplx-mlx>
-
 ## Target Models
 
 | Model | Source |
